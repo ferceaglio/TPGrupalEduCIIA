@@ -28,26 +28,12 @@ int main( void ){
    // Initialize an configurate the board
    boardConfig();   
    
+   ascensorInicializarMEF();   // Inicializar la MEF de ascensor
+   
    // ---------- REPEAT FOR EVER ------------------------------
    while( TRUE )
    {      
-      // If TEC1 is pressed, turn on the LEDR
-      gpioWrite( LEDR, !(gpioRead(TEC1)) );
-      
-      // If TEC2 is pressed, turn on the LED1
-      gpioWrite( LED1, !(gpioRead(TEC2)) );
-      
-      // If TEC3 is pressed, turn on the LED2
-      gpioWrite( LED2, !(gpioRead(TEC3)) );
-      
-      // If TEC4 is pressed, turn on the LED3
-      gpioWrite( LED3, !(gpioRead(TEC4)) );
-
-      // Toggle LEDB
-      gpioToggle( LEDB );
-      
-      // Blocking delay for 100ms
-      delay( 100 );
+      ascensorActualizarMEF();   // Actualizar la MEF de ascensor
    } 
 
    // IT SHOULD NEVER COME HERE, because this program runs directly on a
