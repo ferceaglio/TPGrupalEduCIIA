@@ -1,0 +1,6 @@
+#ifndef _DRIVER_DISPLAY_7SEGMENTOS_H_
+#define _DRIVER_DISPLAY_7SEGMENTOS_H_
+
+// Codigo
+
+#endif
