@@ -22,6 +22,8 @@
 #define TITULO_PISO                 "Piso: "
 #define TITULO_ESTADO               "Estado: "
 
+#define ENTRAR_A_CONFIGURACION      9
+
 estadoAscensor estadoActual;
 int8_t pisoActual = PISO_ACTUAL_INICIAL;
 int8_t pisoSolicitado = PISO_SOLICITADO_INICIAL;
@@ -82,26 +84,19 @@ void enPlantaBaja() {
 
     //TODO abrir puertas, lo ejecuto siempre.. total si estan abiertas las puertas, se van a mantener en ese estado
 
-    if(false) { //TODO require configuracion?
-        
-        actualizarEstadoActual(MODO_CONFIGURACION);
-    
-    } else {
-    
-        chequearSolicitudDePiso();
-    }
+    chequearSolicitudDePiso();
 }
 
 void modoConfiguracion() {
 
     ledsConfigurando();
 
-    //TODOconfigurar();
-
-    //if(!configurando()) {
+    if(!configurando()) {
+    
+        reconfigurarDelayEntrePisos();
     
         actualizarEstadoActual(EN_PLANTA_BAJA);
-    //}    
+    }    
 }
 
 void bajando() {
@@ -207,6 +202,7 @@ void actualizarEstadoActual(estadoAscensor nuevoEstado) {
         case MODO_CONFIGURACION:
         
             uartWriteString(UART_USB, NOMBRE_MODO_CONFIGURACION);
+            configurar();
             break;
             
         case BAJANDO:
@@ -247,7 +243,11 @@ bool_t chequearSolicitudDePiso() {
     
     if(pisoRecibido) {
     
-        if(pisoSolicitado > pisoActual) {
+        if(pisoSolicitado == ENTRAR_A_CONFIGURACION) {
+        
+            actualizarEstadoActual(MODO_CONFIGURACION);
+
+        } else if(pisoSolicitado > pisoActual) {
         
             actualizarEstadoActual(SUBIENDO);            
 
@@ -276,7 +276,7 @@ bool_t recibirPiso() {
     
         pisoSolicitado = pisoSolicitadoTemp - CHAR_CERO;
     
-        uartWriteByte(UART_USB, pisoSolicitado);
+        uartWriteByte(UART_USB, pisoSolicitado + CHAR_CERO);
     }
     
     //TEMPORAL HASTA QUE TENGAMOS EL TECLADO MATRICIAL

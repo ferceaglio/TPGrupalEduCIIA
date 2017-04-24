@@ -23,6 +23,7 @@ void configurandoVelocidadPuertas();
 void configurandoCantidadPisos();
 void configurandoCantidadSubsuelos();
 
-void actualizarEstado(estadoModoConfiguracion nuevoEstado);
+bool_t recibirValorIngresado();
+void actualizarEstadoActualMefModoConfiguracion(estadoModoConfiguracion nuevoEstado);
 
 #endif

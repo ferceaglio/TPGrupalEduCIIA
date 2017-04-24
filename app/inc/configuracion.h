@@ -10,7 +10,7 @@ uint8_t obtenerCantidadSubsuelos();
 
 void configurarVelocidadEntrePisos(uint16_t nuevaVelocidadEntrePisos);
 void configurarVelocidadPuertas(uint16_t nuevaVelocidadPuertas);
-void configurarCantidadPisos(uint8_t nuevaCantidadPisos);
-void configurarCantidadSubsuelos(uint8_t nuevaCantidadSubsuelos);
+bool_t configurarCantidadPisos(uint8_t nuevaCantidadPisos);
+bool_t configurarCantidadSubsuelos(uint8_t nuevaCantidadSubsuelos);
 
 #endif
