@@ -1,13 +1,36 @@
 #include "mefAscensor.h"
 
-estadoAscensor estadoActual = EN_PLANTA_BAJA;
-int8_t pisoActual = 0;
-int8_t pisoSolicitado = 0;
+#define PLANTA_BAJA                 0
+#define PISO_ACTUAL_INICIAL         PLANTA_BAJA
+#define PISO_SOLICITADO_INICIAL     PLANTA_BAJA
+#define ESTADO_INICIAL              EN_PLANTA_BAJA
+#define SUBIR_UN_PISO               1
+#define BAJAR_UN_PISO               -1
+#define SALTO_DE_LINEA              "\r\n"
+#define CHAR_CERO                   '0'
+#define MILLIS_ENTRE_PISOS          1000
+#define MILLIS_TIME_OUT_PARADO      60000
+
+#define TAMANIO_NOMBRE_ESTADO       25
+#define NOMBRE_EN_PLANTA_BAJA       "EN_PLANTA_BAJA"
+#define NOMBRE_MODO_CONFIGURACION   "MODO_CONFIGURACION"
+#define NOMBRE_BAJANDO              "BAJANDO"
+#define NOMBRE_SUBIENDO             "SUBIENDO"
+#define NOMBRE_PARADO               "PARADO"
+#define NOMBRE_YENDO_A_PLANTA_BAJA  "YENDO_A_PLANTA_BAJA"
+
+#define TITULO_PISO                 "Piso: "
+#define TITULO_ESTADO               "Estado: "
+
+estadoAscensor estadoActual;
+int8_t pisoActual = PISO_ACTUAL_INICIAL;
+int8_t pisoSolicitado = PISO_SOLICITADO_INICIAL;
 delay_t delayEntrePisos;
 delay_t delayTimeOutParado;
 
 void ascensorInicializarMEF() {
 
+    actualizarEstadoActual(ESTADO_INICIAL);
     reconfigurarDelayEntrePisos();
     reconfigurarDelayTimeOutParado();
 }
@@ -86,7 +109,7 @@ void bajando() {
     
         if (delayRead(&delayEntrePisos)) {
         
-            actualizarPisoActual(-1);
+            actualizarPisoActual(BAJAR_UN_PISO);
         }
         
     } else {
@@ -103,7 +126,7 @@ void subiendo() {
     
         if (delayRead(&delayEntrePisos)) {
         
-            actualizarPisoActual(1);
+            actualizarPisoActual(SUBIR_UN_PISO);
         }
         
     } else {
@@ -138,13 +161,13 @@ void yendoAPlantaBaja() {
     
     if (!chequearSolicitudDePiso()) {
     
-        if (pisoActual == 0) {
+        if (pisoActual == PLANTA_BAJA) {
         
             actualizarEstadoActual(EN_PLANTA_BAJA);
         
         } else if (delayRead(&delayEntrePisos)) {
                 
-            actualizarPisoActual(pisoActual > 0 ? -1 : 1);      
+            actualizarPisoActual(pisoActual > PLANTA_BAJA ? BAJAR_UN_PISO : SUBIR_UN_PISO);      
         }
 
     
@@ -158,49 +181,104 @@ void actualizarPisoActual(int8_t cantPisos) {
 
     pisoActual += cantPisos;
 
-    uartWriteString(UART_USB, "\nPiso " + pisoActual);
+    uartWriteString(UART_USB, SALTO_DE_LINEA);
+    uartWriteString(UART_USB, TITULO_PISO);
+    uartWriteByte(UART_USB, pisoActual + CHAR_CERO);
 }
 
 void actualizarEstadoActual(estadoAscensor nuevoEstado) {
 
     estadoActual = nuevoEstado;
     
-    uartWriteString(UART_USB, "\nEstado " + estadoActual);
+    char nombreEstado[TAMANIO_NOMBRE_ESTADO];
+    uartWriteString(UART_USB, SALTO_DE_LINEA);
+    uartWriteString(UART_USB, TITULO_ESTADO);
+
+    switch(estadoActual) {
+    
+        case EN_PLANTA_BAJA:
+        
+            uartWriteString(UART_USB, NOMBRE_EN_PLANTA_BAJA);
+            break;
+            
+        case MODO_CONFIGURACION:
+        
+            uartWriteString(UART_USB, NOMBRE_MODO_CONFIGURACION);
+            break;
+            
+        case BAJANDO:
+        
+            uartWriteString(UART_USB, NOMBRE_BAJANDO);
+            break;
+
+        case SUBIENDO:
+        
+            uartWriteString(UART_USB, NOMBRE_SUBIENDO);
+            break;
+            
+        case PARADO:
+        
+            uartWriteString(UART_USB, NOMBRE_PARADO);
+            break;
+            
+        case YENDO_A_PLANTA_BAJA:
+        
+            uartWriteString(UART_USB, NOMBRE_YENDO_A_PLANTA_BAJA);
+            break;
+    }
 }
 
 void reconfigurarDelayEntrePisos() {
 
-    delayConfig(&delayEntrePisos, 1000);
+    delayConfig(&delayEntrePisos, MILLIS_ENTRE_PISOS);
 }
 
 void reconfigurarDelayTimeOutParado() {
 
-    delayConfig(&delayTimeOutParado, 60000);
+    delayConfig(&delayTimeOutParado, MILLIS_TIME_OUT_PARADO);
 }
 
 bool_t chequearSolicitudDePiso() {
+
+    bool_t pisoRecibido = recibirPiso();
     
-    pisoSolicitado = 0;//TODO pedir nuevo piso
-    
-    bool_t nuevaSolicitudDePiso = FALSE;
-    
-    if(pisoSolicitado != pisoActual) {
+    if(pisoRecibido) {
     
         if(pisoSolicitado > pisoActual) {
         
-            estadoActual = SUBIENDO;            
+            actualizarEstadoActual(SUBIENDO);            
 
         } else {
         
-            estadoActual = BAJANDO;
+            actualizarEstadoActual(BAJANDO);
         }
         
         //TODO cerrar puertas
-        
-        nuevaSolicitudDePiso = TRUE;
     }
     
-    return nuevaSolicitudDePiso;
+    return pisoRecibido;
+}
+
+bool_t recibirPiso() {
+    
+    //TODO TEMPORAL HASTA QUE TENGAMOS EL TECLADO MATRICIAL
+
+    uint8_t pisoSolicitadoTemp;
+    
+    bool_t pisoIngresado = FALSE;
+    
+    if(uartReadByte(UART_USB, &pisoSolicitadoTemp)) {
+    
+        pisoIngresado = TRUE;
+    
+        pisoSolicitado = pisoSolicitadoTemp - CHAR_CERO;
+    
+        uartWriteByte(UART_USB, pisoSolicitado);
+    }
+    
+    //TEMPORAL HASTA QUE TENGAMOS EL TECLADO MATRICIAL
+    
+    return pisoIngresado && pisoSolicitado != pisoActual;
 }
 
 void ledsEnMovimiento() {

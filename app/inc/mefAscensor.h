@@ -29,6 +29,7 @@ void actualizarEstadoActual(estadoAscensor nuevoEstado);
 void reconfigurarDelayEntrePisos();
 void reconfigurarDelayTimeOutParado();
 bool_t chequearSolicitudDePiso();
+bool_t recibirPiso();
 void ledsEnMovimiento();
 void ledsSinMovimiento();
 void ledsConfigurando();
