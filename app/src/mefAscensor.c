@@ -1,4 +1,5 @@
 #include "mefAscensor.h"
+#include "configuracion.h"
 
 #define PLANTA_BAJA                 0
 #define PISO_ACTUAL_INICIAL         PLANTA_BAJA
@@ -8,7 +9,6 @@
 #define BAJAR_UN_PISO               -1
 #define SALTO_DE_LINEA              "\r\n"
 #define CHAR_CERO                   '0'
-#define MILLIS_ENTRE_PISOS          1000
 #define MILLIS_TIME_OUT_PARADO      60000
 
 #define TAMANIO_NOMBRE_ESTADO       25
@@ -96,9 +96,12 @@ void modoConfiguracion() {
 
     ledsConfigurando();
 
-    //TODO recibe configuracion
+    //TODOconfigurar();
+
+    //if(!configurando()) {
     
-    actualizarEstadoActual(EN_PLANTA_BAJA);    
+        actualizarEstadoActual(EN_PLANTA_BAJA);
+    //}    
 }
 
 void bajando() {
@@ -230,7 +233,7 @@ void actualizarEstadoActual(estadoAscensor nuevoEstado) {
 
 void reconfigurarDelayEntrePisos() {
 
-    delayConfig(&delayEntrePisos, MILLIS_ENTRE_PISOS);
+    delayConfig(&delayEntrePisos, obtenerVelocidadEntrePisos());
 }
 
 void reconfigurarDelayTimeOutParado() {
