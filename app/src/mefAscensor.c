@@ -1,16 +1,5 @@
 #include "mefAscensor.h"
 
-typedef enum {
-
-    EN_PLANTA_BAJA,
-    MODO_CONFIGURACION,
-    BAJANDO,
-    SUBIENDO,
-    PARADO,
-    YENDO_A_PLANTA_BAJA
-    
-    } estadoAscensor;
-
 estadoAscensor estadoActual = EN_PLANTA_BAJA;
 int8_t pisoActual = 0;
 int8_t pisoSolicitado = 0;
@@ -72,7 +61,7 @@ void enPlantaBaja() {
 
     if(false) { //TODO require configuracion?
         
-        estadoActual = MODO_CONFIGURACION;
+        actualizarEstadoActual(MODO_CONFIGURACION);
     
     } else {
     
@@ -86,25 +75,23 @@ void modoConfiguracion() {
 
     //TODO recibe configuracion
     
-    estadoActual = EN_PLANTA_BAJA;    
+    actualizarEstadoActual(EN_PLANTA_BAJA);    
 }
 
 void bajando() {
 
     ledsEnMovimiento();
 
-    gpioWrite( LEDG, OFF );
-
     if(pisoActual > pisoSolicitado) {
     
         if (delayRead(&delayEntrePisos)) {
         
-            pisoActual--;
+            actualizarPisoActual(-1);
         }
         
     } else {
     
-        estadoActual = PARADO;
+        actualizarEstadoActual(PARADO);
     }
 }
 
@@ -116,12 +103,12 @@ void subiendo() {
     
         if (delayRead(&delayEntrePisos)) {
         
-            pisoActual++;
+            actualizarPisoActual(1);
         }
         
     } else {
     
-        estadoActual = PARADO;
+        actualizarEstadoActual(PARADO);
     }
 }
 
@@ -131,11 +118,11 @@ void parado() {
 
     //TODO abrir puertas, lo ejecuto siempre.. total si estan abiertas las puertas, se van a mantener en ese estado
 
-    if(!chequearSolicitudDePiso()) {
+    if (!chequearSolicitudDePiso()) {
     
         if (delayRead(&delayTimeOutParado)) {
         
-            estadoActual = YENDO_A_PLANTA_BAJA;
+            actualizarEstadoActual(YENDO_A_PLANTA_BAJA);
         }
     
     } else {
@@ -149,6 +136,36 @@ void yendoAPlantaBaja() {
     
     ledsEnMovimiento();
     
+    if (!chequearSolicitudDePiso()) {
+    
+        if (pisoActual == 0) {
+        
+            actualizarEstadoActual(EN_PLANTA_BAJA);
+        
+        } else if (delayRead(&delayEntrePisos)) {
+                
+            actualizarPisoActual(pisoActual > 0 ? -1 : 1);      
+        }
+
+    
+    } else {
+    
+        reconfigurarDelayEntrePisos();
+    }
+}
+
+void actualizarPisoActual(int8_t cantPisos) {
+
+    pisoActual += cantPisos;
+
+    uartWriteString(UART_USB, "\nPiso " + pisoActual);
+}
+
+void actualizarEstadoActual(estadoAscensor nuevoEstado) {
+
+    estadoActual = nuevoEstado;
+    
+    uartWriteString(UART_USB, "\nEstado " + estadoActual);
 }
 
 void reconfigurarDelayEntrePisos() {

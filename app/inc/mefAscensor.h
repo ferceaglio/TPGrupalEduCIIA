@@ -3,6 +3,17 @@
 
 #include "sapi.h"
 
+typedef enum {
+
+    EN_PLANTA_BAJA,
+    MODO_CONFIGURACION,
+    BAJANDO,
+    SUBIENDO,
+    PARADO,
+    YENDO_A_PLANTA_BAJA
+    
+    } estadoAscensor;
+
 void ascensorInicializarMEF();
 void ascensorActualizarMEF();
 
@@ -13,6 +24,8 @@ void subiendo();
 void parado();
 void yendoAPlantaBaja();
 
+void actualizarPisoActual(int8_t cantPisos);
+void actualizarEstadoActual(estadoAscensor nuevoEstado);
 void reconfigurarDelayEntrePisos();
 void reconfigurarDelayTimeOutParado();
 bool_t chequearSolicitudDePiso();
