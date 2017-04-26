@@ -112,7 +112,7 @@ void bajando() {
         
     } else {
     
-        actualizarEstadoActual(PARADO);
+        frenar();
     }
 }
 
@@ -129,7 +129,7 @@ void subiendo() {
         
     } else {
     
-        actualizarEstadoActual(PARADO);
+        frenar();
     }
 }
 
@@ -172,6 +172,18 @@ void yendoAPlantaBaja() {
     } else {
     
         reconfigurarDelayEntrePisos();
+    }
+}
+
+void frenar() {
+    
+    if(pisoActual == PLANTA_BAJA) {
+        
+       actualizarEstadoActual(EN_PLANTA_BAJA);        
+
+    } else {
+        
+            actualizarEstadoActual(PARADO);
     }
 }
 
@@ -243,7 +255,7 @@ bool_t chequearSolicitudDePiso() {
     
     if(pisoRecibido) {
     
-        if(pisoSolicitado == ENTRAR_A_CONFIGURACION) {
+        if(pisoSolicitado == ENTRAR_A_CONFIGURACION && estadoActual == EN_PLANTA_BAJA) {
         
             actualizarEstadoActual(MODO_CONFIGURACION);
 

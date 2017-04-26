@@ -24,6 +24,7 @@ void subiendo();
 void parado();
 void yendoAPlantaBaja();
 
+void frenar();
 void actualizarPisoActual(int8_t cantPisos);
 void actualizarEstadoActual(estadoAscensor nuevoEstado);
 void reconfigurarDelayEntrePisos();
